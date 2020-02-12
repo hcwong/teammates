@@ -72,7 +72,7 @@ public class ActionFactory {
         map(ResourceURIs.STUDENT, GET, GetStudentAction.class);
         map(ResourceURIs.STUDENT, PUT, UpdateStudentAction.class);
 
-        map(ResourceURIs.STUDENT_ACCOUNTS_SEARCH, GET, SearchStudentAccountsAction.class);
+        map(ResourceURIs.STUDENTS_SEARCH, GET, SearchStudentsAction.class);
         map(ResourceURIs.SESSIONS_ONGOING, GET, GetOngoingSessionsAction.class);
         map(ResourceURIs.SESSION_STATS, GET, GetSessionResponseStatsAction.class);
         map(ResourceURIs.SESSION, GET, GetFeedbackSessionAction.class);
