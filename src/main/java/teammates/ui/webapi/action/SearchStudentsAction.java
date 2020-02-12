@@ -24,7 +24,7 @@ public class SearchStudentsAction extends Action {
 
     @Override
     public ActionResult execute() {
-        String searchKey = getNonNullRequestParamValue(Const.ParamsNames.ADMIN_SEARCH_KEY);
+        String searchKey = getNonNullRequestParamValue(Const.ParamsNames.SEARCH_KEY);
         List<InstructorAttributes> instructors = logic.getInstructorsForGoogleId(userInfo.id);
 
         List<StudentAttributes> students = logic.searchStudents(searchKey, instructors).studentList;
