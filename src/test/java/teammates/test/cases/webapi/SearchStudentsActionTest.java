@@ -1,17 +1,16 @@
 package teammates.test.cases.webapi;
 
 import org.junit.Test;
+
 import teammates.common.datatransfer.DataBundle;
-import teammates.common.datatransfer.attributes.InstructorAttributes;
+import teammates.common.datatransfer.attributes.StudentAttributes;
 import teammates.common.util.Const;
 import teammates.ui.webapi.action.JsonResult;
-import teammates.ui.webapi.action.SearchAccountsAction;
 import teammates.ui.webapi.action.SearchStudentsAction;
-import teammates.ui.webapi.output.AdminSearchResultData;
 import teammates.ui.webapi.output.SearchStudentsData;
 
 /**
- * SUT:{@link SearchStudentsAction}
+ * SUT:{@link SearchStudentsAction}.
  */
 public class SearchStudentsActionTest extends BaseActionTest<SearchStudentsAction> {
 
@@ -33,127 +32,108 @@ public class SearchStudentsActionTest extends BaseActionTest<SearchStudentsActio
     }
 
     @Override
-    @Test
     protected void testExecute() {
-        InstructorAttributes acc = typicalBundle.instructors.get("instructor1OfCourse1");
+        // TODO: Remove
+    }
+
+    @Test
+    public void execute_notEnoughParameters_parameterFailure() {
         loginAsAdmin();
-
-        ______TS("Not enough parameters");
-
         verifyHttpParameterFailure();
+    }
 
-        ______TS("Typical case (Admin): search google id");
+    @Test
+    public void execute_adminSearchName_success() {
+        StudentAttributes acc = typicalBundle.students.get("student1InCourse1");
+        loginAsAdmin();
+        String[] accNameParams = new String[] {
+                Const.ParamsNames.SEARCH_KEY, acc.getName(),
+        };
+        SearchStudentsAction a = getAction(accNameParams);
+        JsonResult result = getJsonResult(a);
+        SearchStudentsData response = (SearchStudentsData) result.getOutput();
+        assertEquals(11, response.getStudents().size());
+    }
 
+    @Test
+    public void execute_adminSearchCourseId_success() {
+        StudentAttributes acc = typicalBundle.students.get("student1InCourse1");
+        loginAsAdmin();
+        String[] accCourseIdParams = new String[] {
+                Const.ParamsNames.SEARCH_KEY, acc.getCourse(),
+        };
+        SearchStudentsAction a = getAction(accCourseIdParams);
+        JsonResult result = getJsonResult(a);
+        SearchStudentsData response = (SearchStudentsData) result.getOutput();
+        assertEquals(5, response.getStudents().size());
+    }
+
+    @Test
+    public void execute_adminSearchAccountsGeneral_success() {
+        loginAsAdmin();
+        String[] accNameParams = new String[] {
+                Const.ParamsNames.SEARCH_KEY, "Course2",
+        };
+        SearchStudentsAction a = getAction(accNameParams);
+        JsonResult result = getJsonResult(a);
+        SearchStudentsData response = (SearchStudentsData) result.getOutput();
+
+        assertEquals(2, response.getStudents().size());
+    }
+
+    @Test
+    public void execute_adminSearchEmail_success() {
+        loginAsAdmin();
+        StudentAttributes acc = typicalBundle.students.get("student1InCourse1");
+        String[] emailParams = new String[] {
+                Const.ParamsNames.SEARCH_KEY, acc.getEmail(),
+        };
+
+        SearchStudentsAction a = getAction(emailParams);
+        JsonResult result = getJsonResult(a);
+        SearchStudentsData response = (SearchStudentsData) result.getOutput();
+
+        assertEquals(1, response.getStudents().size());
+    }
+
+    @Test
+    public void execute_adminSearchNoMatch_noMatch() {
+        loginAsAdmin();
+        String[] accNameParams = new String[] {
+                Const.ParamsNames.SEARCH_KEY, "minuscoronavirus",
+        };
+        SearchStudentsAction a = getAction(accNameParams);
+        JsonResult result = getJsonResult(a);
+        SearchStudentsData response = (SearchStudentsData) result.getOutput();
+
+        assertEquals(0, response.getStudents().size());
+    }
+
+    @Test
+    public void execute_adminSearchGoogleId_success() {
+        loginAsAdmin();
         String[] googleIdParams = new String[] {
-                Const.ParamsNames.SEARCH_KEY, acc.getGoogleId(),
+                Const.ParamsNames.SEARCH_KEY, "Course",
+        };
+        SearchStudentsAction a = getAction(googleIdParams);
+        JsonResult result = getJsonResult(a);
+        SearchStudentsData response = (SearchStudentsData) result.getOutput();
+
+        assertEquals(11, response.getStudents().size());
+    }
+
+    @Test
+    public void execute_instructorSearchGoogleId_matchOnlyStudentsInCourse() {
+        loginAsInstructor("idOfInstructor1OfCourse1");
+        String[] googleIdParams = new String[] {
+                Const.ParamsNames.SEARCH_KEY, "Course",
         };
 
         SearchStudentsAction a = getAction(googleIdParams);
         JsonResult result = getJsonResult(a);
         SearchStudentsData response = (SearchStudentsData) result.getOutput();
-        assertTrue(response.getStudents().isEmpty());
-
-        ______TS("Typical case (Admin): search course id");
-        String[] courseIdParams = new String[] {
-                Const.ParamsNames.SEARCH_KEY, acc.getCourseId(),
-        };
-
-        a = getAction(courseIdParams);
-        result = getJsonResult(a);
-        response = (SearchStudentsData) result.getOutput();
 
         assertEquals(5, response.getStudents().size());
-
-        ______TS("Typical case (Admin): full text search accounts that contains 'Course2'");
-        String[] accNameParams = new String[] {
-                Const.ParamsNames.SEARCH_KEY, "Course2",
-        };
-
-        a = getAction(accNameParams);
-        result = getJsonResult(a);
-        response = (SearchStudentsData) result.getOutput();
-
-        assertEquals(2, response.getStudents().size());
-
-        ______TS("Typical case (Admin): search email");
-        String[] emailParams = new String[] {
-                Const.ParamsNames.SEARCH_KEY, "@course1.tmt",
-        };
-
-        a = getAction(emailParams);
-        result = getJsonResult(a);
-        response = (SearchStudentsData) result.getOutput();
-
-        assertEquals(0, response.getStudents().size());
-
-        ______TS("Typical case (Admin): search has no match");
-        String[] noMatchParams = new String[] {
-                Const.ParamsNames.SEARCH_KEY, "nomatch",
-        };
-
-        a = getAction(noMatchParams);
-        result = getJsonResult(a);
-        response = (SearchStudentsData) result.getOutput();
-
-        assertEquals(0, response.getStudents().size());
-
-        // Instructor tests below
-        loginAsInstructor(acc.getGoogleId());
-
-        ______TS("Typical case (Instructor): search google id");
-
-        googleIdParams = new String[] {
-                Const.ParamsNames.SEARCH_KEY, acc.getGoogleId(),
-        };
-
-        a = getAction(googleIdParams);
-        result = getJsonResult(a);
-        response = (SearchStudentsData) result.getOutput();
-        assertTrue(response.getStudents().isEmpty());
-
-        ______TS("Typical case (Instructor): search course id");
-        courseIdParams = new String[] {
-                Const.ParamsNames.SEARCH_KEY, acc.getCourseId(),
-        };
-
-        a = getAction(courseIdParams);
-        result = getJsonResult(a);
-        response = (SearchStudentsData) result.getOutput();
-
-        assertEquals(5, response.getStudents().size());
-
-        ______TS("Typical case (Instructor): full text search accounts that contains 'Course2'");
-        accNameParams = new String[] {
-                Const.ParamsNames.SEARCH_KEY, "Course2",
-        };
-
-        a = getAction(accNameParams);
-        result = getJsonResult(a);
-        response = (SearchStudentsData) result.getOutput();
-
-        assertEquals(2, response.getStudents().size());
-
-        ______TS("Typical case (Instructor): search email");
-        emailParams = new String[] {
-                Const.ParamsNames.SEARCH_KEY, "@course1.tmt",
-        };
-
-        a = getAction(emailParams);
-        result = getJsonResult(a);
-        response = (SearchStudentsData) result.getOutput();
-
-        assertEquals(0, response.getStudents().size());
-
-        ______TS("Typical case (Instructor): search has no match");
-        noMatchParams = new String[] {
-                Const.ParamsNames.SEARCH_KEY, "nomatch",
-        };
-
-        a = getAction(noMatchParams);
-        result = getJsonResult(a);
-        response = (SearchStudentsData) result.getOutput();
-
-        assertEquals(0, response.getStudents().size());
     }
 
     @Override

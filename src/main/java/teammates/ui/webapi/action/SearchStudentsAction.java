@@ -8,6 +8,9 @@ import teammates.common.exception.UnauthorizedAccessException;
 import teammates.common.util.Const;
 import teammates.ui.webapi.output.SearchStudentsData;
 
+/**
+ * Action for searching for students.
+ */
 public class SearchStudentsAction extends Action {
     @Override
     protected AuthType getMinAuthLevel() {
@@ -25,9 +28,13 @@ public class SearchStudentsAction extends Action {
     @Override
     public ActionResult execute() {
         String searchKey = getNonNullRequestParamValue(Const.ParamsNames.SEARCH_KEY);
-        List<InstructorAttributes> instructors = logic.getInstructorsForGoogleId(userInfo.id);
-
-        List<StudentAttributes> students = logic.searchStudents(searchKey, instructors).studentList;
+        List<StudentAttributes> students;
+        if (userInfo.isAdmin) {
+            students = logic.searchStudentsInWholeSystem(searchKey).studentList;
+        } else {
+            List<InstructorAttributes> instructors = logic.getInstructorsForGoogleId(userInfo.id);
+            students = logic.searchStudents(searchKey, instructors).studentList;
+        }
         return new JsonResult(new SearchStudentsData(students));
     }
 }
