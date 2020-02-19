@@ -20,7 +20,7 @@ public class SearchStudentsAction extends Action {
     @Override
     public void checkSpecificAccessControl() {
         // Only instructors and admins can search for student
-        if (userInfo.isStudent) {
+        if (userInfo.isStudent && !userInfo.isInstructor) {
             throw new UnauthorizedAccessException("Instructor or Admin privilege is required to access this resource.");
         }
     }
