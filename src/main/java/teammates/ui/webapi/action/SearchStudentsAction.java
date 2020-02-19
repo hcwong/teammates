@@ -34,6 +34,12 @@ public class SearchStudentsAction extends Action {
         } else {
             List<InstructorAttributes> instructors = logic.getInstructorsForGoogleId(userInfo.id);
             students = logic.searchStudents(searchKey, instructors).studentList;
+            // hide information
+            students.forEach(s -> {
+                s.setComments(null);
+                s.setGoogleId(null);
+                s.setKey(null);
+            });
         }
         return new JsonResult(new SearchStudentsData(students));
     }
