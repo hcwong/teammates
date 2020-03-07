@@ -1,5 +1,7 @@
 package teammates.ui.webapi.output;
 
+import javax.annotation.Nullable;
+
 import teammates.common.datatransfer.attributes.StudentAttributes;
 
 /**
@@ -10,6 +12,7 @@ public class StudentData extends ApiOutput {
     private final String email;
     private final String courseId;
 
+    @Nullable
     private String googleId;
 
     private final String name;
